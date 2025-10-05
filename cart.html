@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - My E-commerce Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>My E-commerce Shop</h1>
+        <nav>
+            <a href="index.html">Shop</a>
+            <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Your Cart</h2>
+        <div id="cart-items"></div>
+
+        <div id="cart-summary">
+            <h3>Total: ₹<span id="total-price">0</span></h3>
+            <button id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Display cart items
+        function displayCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            cartItemsDiv.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<p>Your cart is empty.</p>';
+                document.getElementById('cart-summary').style.display = 'none';
+                return;
+            }
+
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+
+                itemDiv.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <p>Price: ₹${item.price}</p>
+                    <p>Quantity: 
+                        <input type="number" min="1" value="${item.quantity}" id="qty-${index}" />
+                    </p>
+                    <p>Subtotal: ₹${subtotal}</p>
+                    <button onclick="removeItem(${index})">Remove</button>
+                    <hr>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+
+                // Update quantity event
+                document.getElementById(`qty-${index}`).addEventListener('change', (e) => {
+                    const qty = parseInt(e.target.value);
+                    if (qty > 0) {
+                        cart[index].quantity = qty;
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        displayCart();
+                        updateCartCount();
+                    }
+                });
+            });
+
+            document.getElementById('total-price').textContent = total;
+            document.getElementById('cart-summary').style.display = 'block';
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+            updateCartCount();
+        }
+
+        // Checkout button
+        document.getElementById('checkout-btn').addEventListener('click', () => {
+            if (cart.length > 0) {
+                window.location.href = 'checkout.html';
+            } else {
+                alert('Your cart is empty.');
+            }
+        });
+
+        // Initialize
+        displayCart();
+        updateCartCount();
+    </script>
+</body>
+</html>
